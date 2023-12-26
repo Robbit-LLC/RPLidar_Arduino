@@ -62,7 +62,7 @@ public:
         MAX_SCAN_NODES = 8192,
     };
 
-    bool begin();     
+    bool begin(HardwareSerial &_lidarSerial);     
     bool isScanning();     
     bool isConnected();     
     u_result reset(_u32 timeout = DEFAULT_TIMEOUT);
@@ -131,5 +131,7 @@ protected:
     bool                                         _is_previous_capsuledataRdy;
     bool                                         _is_previous_HqdataRdy;
     bool                                         _syncBit_is_finded;
+
+    HardwareSerial _lidarSerial{Serial};
 };
 
