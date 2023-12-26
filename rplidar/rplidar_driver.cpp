@@ -81,8 +81,11 @@ static void convert(const rplidar_response_measurement_node_hq_t& from, rplidar_
     to.distance_q2 = from.dist_mm_q2 > _u16(-1) ? _u16(0) : _u16(from.dist_mm_q2);
 }
 
-
+#if defined(ARDUINO_TEENSY41)
+bool RPLidar::begin(usb_serial_class &lidarSerial)
+#else
 bool RPLidar::begin(HardwareSerial &lidarSerial)
+#endif
 {
 	_lidarSerial = lidarSerial;
 

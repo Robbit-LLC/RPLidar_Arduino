@@ -132,6 +132,10 @@ protected:
     bool                                         _is_previous_HqdataRdy;
     bool                                         _syncBit_is_finded;
 
+#if defined(ARDUINO_TEENSY41)
+    usb_serial_class _lidarSerial{Serial};
+#else
     HardwareSerial _lidarSerial{Serial};
+#endif
 };
 
