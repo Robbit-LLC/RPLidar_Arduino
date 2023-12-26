@@ -85,7 +85,6 @@ static void convert(const rplidar_response_measurement_node_hq_t& from, rplidar_
 bool RPLidar::begin(HardwareSerial &lidarSerial)
 {
 	_lidarSerial = lidarSerial;
-    _lidarSerial.begin(115200);
 
     _cached_scan_node_hq_count = 0;
     _isConnected = true;
