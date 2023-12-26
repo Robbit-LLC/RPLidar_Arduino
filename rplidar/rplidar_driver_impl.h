@@ -62,7 +62,11 @@ public:
         MAX_SCAN_NODES = 8192,
     };
 
-    bool begin(HardwareSerial &_lidarSerial);     
+#if defined(ARDUINO_TEENSY41)
+    bool begin(usb_serial_class &_lidarSerial);
+#else
+    bool begin(HardwareSerial &_lidarSerial);   
+#endif  
     bool isScanning();     
     bool isConnected();     
     u_result reset(_u32 timeout = DEFAULT_TIMEOUT);
