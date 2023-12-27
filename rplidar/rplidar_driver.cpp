@@ -81,13 +81,10 @@ static void convert(const rplidar_response_measurement_node_hq_t& from, rplidar_
     to.distance_q2 = from.dist_mm_q2 > _u16(-1) ? _u16(0) : _u16(from.dist_mm_q2);
 }
 
-#if defined(ARDUINO_TEENSY41)
-bool RPLidar::begin(usb_serial_class &lidarSerial)
-#else
+
 bool RPLidar::begin(HardwareSerial &lidarSerial)
-#endif
 {
-	_lidarSerial = lidarSerial;
+	_lidarSerial = &lidarSerial;
 
     _cached_scan_node_hq_count = 0;
     _isConnected = true;
@@ -125,7 +122,7 @@ u_result RPLidar::_waitResponseHeader(rplidar_ans_header_t * header, _u32 timeou
     _u8 *headerbuf = (_u8*)header;
     while ((remainingtime=millis() - currentTs) <= timeout) {
         
-        int currentbyte = _lidarSerial.read();
+        int currentbyte = _lidarSerial->read();
         if (currentbyte<0) continue;
         
         switch (recvPos) {
@@ -190,7 +187,7 @@ u_result RPLidar::getHealth(rplidar_response_device_health_t & healthinfo, _u32 
         _u32 currentTs = millis();
         _u32 remainingtime;
         while ((remainingtime=millis() - currentTs) <= timeout) {
-            int currentbyte = _lidarSerial.read();
+            int currentbyte = _lidarSerial->read();
             if (currentbyte < 0) continue;
             
             infobuf[recvPos++] = currentbyte;
@@ -240,7 +237,7 @@ u_result RPLidar::getDeviceInfo(rplidar_response_device_info_t & info, _u32 time
         _u32 currentTs = millis();
         _u8  recvPos = 0;
         while ((remainingtime=millis() - currentTs) <= timeout) {
-            int currentbyte = _lidarSerial.read();
+            int currentbyte = _lidarSerial->read();
             if (currentbyte<0) continue;    
             infobuf[recvPos++] = currentbyte;
 
@@ -265,7 +262,7 @@ u_result RPLidar::_waitNode(rplidar_response_measurement_node_t * node, _u32 tim
    _u8 recvPos = 0;
 
    while ((remainingtime=millis() - currentTs) <= timeout) {
-        int currentbyte = _lidarSerial.read();
+        int currentbyte = _lidarSerial->read();
         if (currentbyte<0) continue;
 
         switch (recvPos) {
@@ -312,7 +309,7 @@ u_result RPLidar::_waitCapsuledNode(rplidar_response_capsule_measurement_nodes_t
    while ((waitTime=millis() - startTs) <= timeout) {
         size_t remainSize = sizeof(rplidar_response_capsule_measurement_nodes_t) - recvPos;
 
-        int currentbyte = _lidarSerial.read();
+        int currentbyte = _lidarSerial->read();
         if (currentbyte<0) continue;
         recvBuffer[0] = currentbyte;
         size_t recvSize=1;
@@ -876,7 +873,7 @@ u_result RPLidar::getLidarConf(_u32 type, std::vector<_u8> &outputBuf, const std
         _u32 currentTs = millis();
         _u8  recvPos = 0;
         while ((remainingtime=millis() - currentTs) <= timeout) {
-            int currentbyte = _lidarSerial.read();
+            int currentbyte = _lidarSerial->read();
             if (currentbyte<0) continue;    
             infobuf[recvPos++] = currentbyte;
 
@@ -1384,7 +1381,7 @@ u_result RPLidar::_sendCommand(_u8 cmd, const void * payload, size_t payloadsize
     header->cmd_flag = cmd;
 
     // send header first
-    _lidarSerial.write((uint8_t *)header, 2);
+    _lidarSerial->write((uint8_t *)header, 2);
 
     if (cmd & RPLIDAR_CMDFLAG_HAS_PAYLOAD) {
         checksum ^= RPLIDAR_CMD_SYNC_BYTE;
@@ -1397,13 +1394,13 @@ u_result RPLidar::_sendCommand(_u8 cmd, const void * payload, size_t payloadsize
         }
         // send size
         _u8 sizebyte = payloadsize;
-        _lidarSerial.write((uint8_t *)&sizebyte, 1);
+        _lidarSerial->write((uint8_t *)&sizebyte, 1);
 
         // send payload
-        _lidarSerial.write((uint8_t *)payload, sizebyte);
+        _lidarSerial->write((uint8_t *)payload, sizebyte);
 
         // send checksum
-        _lidarSerial.write((uint8_t *)&checksum, 1);
+        _lidarSerial->write((uint8_t *)&checksum, 1);
     }
 
     return RESULT_OK;
@@ -1454,7 +1451,7 @@ u_result RPLidar::getSampleDuration_uS(rplidar_response_sample_rate_t & rateInfo
         _u8  recvPos = 0;
         _u32 currentTs = millis();
         while ((remainingtime=millis() - currentTs) <= timeout) {
-            int currentbyte = _lidarSerial.read();
+            int currentbyte = _lidarSerial->read();
             if (currentbyte<0) continue;    
             infobuf[recvPos++] = currentbyte;
 
